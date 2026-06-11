@@ -42,4 +42,8 @@ Cabe aclarar que el programa cuenta con un menú interactivo que permite al usua
 
 - El sistema podría no tener límites de apuesta máxima o mínima, lo cual para eventos reales es algo importante a considerar, ya que podría poner en apuros la economía del casino online al ofrecer promociones "seguras" para usuarios sin límite de saldo
 
+# Comando para compilar y ejecutar el código
 
+(compilar) g++ main.cpp Cuota.cpp Evento_Deportivo.cpp Apuesta.cpp Usuario.cpp Administrador.cpp Jugador.cpp Sistema_Apuestas.cpp -o casino.exe
+
+(ejecutar) .\casino.exe
