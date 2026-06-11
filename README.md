@@ -5,11 +5,33 @@ Casino Coin es un porgrama diseñado totalmente en C++ que busca emular el fervo
 
 # Funcionalidad
 
-<img width="1126" height="710" alt="image" src="https://github.com/user-attachments/assets/2663c548-ff56-463c-8557-bde2c74cecc0" />
+<img width="1581" height="988" alt="image" src="https://github.com/user-attachments/assets/9cb69445-bec1-4b9f-b0e0-f6a40c6e0369" />
 
-El sistema es simple, ya que está compuesto de 7 clases que tienen relaciones claras entre sí. Básicamente, el programa gestiona las apuestas relizadas por usuarios a partir de la clase  SistemaApuestas. Desde ahí se gestiona el menú principal, los vectores o listas recolectados de los usuarios, los eventos deportivos y de las apuestas, entre otras cosas. La clase EventoDeportivo gestiona los eventos deportivos y sus momios, por lo cual se creó otra clase llamada Cuota la cual se integra para facilitar la exposición y manejo de cuotas por cada evento (de ahí que sea una relación de composición).
 
-Por otro lado, la clase Apuesta gestiona la apuesta que el usuario tipo Jugador desee hacer. Ahí se calcula su ganancia potencial, la selección que se desee, el estado de la apuesta,etc. Un punto clave a tener aquí es que se agregó un atributo que antes no se tenía contemplado hasta hace poco, el cual es el atributo idUsuario. Debido a que la clase Usuario se define como una clase abstracta para denegar u otrogar permisos, los cuales se bifurcan en aquellos correspondientes al Jugador y Administrador, el idUsuario integrado en la clase Apuesta agiliza la corroboración del tipo de usuario mediante el ID, de tal manera que el Administrador puede visualizar el historial total de apuestas de uno o más usuarios, mientras que el Jugador sólo puede visualizar el suyo.
+# Descripción de clases y relaciones del sistema
+
+El proyecto está compuesto por siete clases principales: `Sistema_Apuestas`, `Usuario`, `Jugador`, `Administrador`, `Evento_Deportivo`, `Cuota` y `Apuesta`. La idea fue mantener una estructura sencilla, pero que sí representara bien cómo funciona un casino de apuestas deportivas: hay usuarios, eventos disponibles, cuotas y apuestas registradas.
+
+La clase `Sistema_Apuestas` funciona como el centro de control del programa. Desde ahí se registran usuarios, se agregan eventos, se buscan partidos y se guarda el historial general de apuestas. En el código se usan vectores como `vector<Usuario*> usuarios`, `vector<Evento_Deportivo> eventos` y `vector<Apuesta> apuestas`. Un vector es básicamente una lista dinámica, es decir, una estructura donde se pueden ir agregando elementos conforme el programa avanza. Se usaron vectores porque el sistema no trabaja con una sola apuesta o un solo evento, sino con varios usuarios, varios partidos y varias apuestas.
+
+El vector `usuarios` usa apuntadores de tipo `Usuario*` porque `Usuario` es una clase abstracta. Esto significa que no se pueden crear objetos directos de tipo `Usuario`, ya que en el sistema un usuario real debe ser un `Jugador` o un `Administrador`. Gracias a los apuntadores, el sistema puede guardar jugadores y administradores dentro de una misma lista, aprovechando el polimorfismo.
+
+La clase `Usuario` es la clase base abstracta del proyecto. Contiene los datos comunes que comparten los usuarios, como `idUsuario` y `nombre`. Se declaró como abstracta porque no tendría mucho sentido crear un usuario genérico dentro del casino. Para lograr esto se usa el método virtual puro `verHistorial(vector<Apuesta>& apuestas) = 0`, que obliga a las clases hijas a implementar su propia forma de mostrar historial.
+
+La herencia aparece en las clases `Jugador` y `Administrador`, ya que ambas heredan de `Usuario`. En el código esto se representa con `class Jugador : public Usuario` y `class Administrador : public Usuario`. La clase `Jugador` agrega elementos propios como `saldo`, `depositarSaldo()`, `retirarSaldo()` y `realizarApuesta()`, porque solo el jugador puede manejar dinero y hacer apuestas. En cambio, `Administrador` no tiene saldo, pero sí puede consultar el historial general.
+
+La sobreescritura se usa en el método `verHistorial()`. El método existe desde `Usuario`, pero cada clase hija lo desarrolla de forma distinta. En `Jugador`, el historial se filtra con el `idUsuario`, por lo que solo se muestran las apuestas de ese jugador. En `Administrador`, el método muestra todas las apuestas registradas. Así, el mismo método tiene comportamientos diferentes dependiendo del tipo de usuario que lo use.
+
+La clase `Apuesta` representa una apuesta individual. Guarda datos como `idApuesta`, `idUsuario`, `idEvento`, `monto`, `seleccion`, `gananciaPotencial` y `estado`. El atributo `idUsuario` permite saber qué jugador hizo la apuesta, mientras que `idEvento` permite identificar sobre qué partido se apostó. Esto ayuda a que el historial pueda revisarse de forma personal para un jugador o de forma general para el administrador.
+
+La clase `Evento_Deportivo` representa los partidos o eventos disponibles para apostar. Guarda información como deporte, equipo local, equipo visitante, fecha, resultado y estado. Además, tiene un atributo de tipo `Cuota`, lo que representa la relación entre el evento y sus momios. En otras palabras, cada evento tiene sus propias cuotas, y esas cuotas se usan para calcular la posible ganancia de una apuesta.
+
+La clase `Cuota` guarda los momios del evento: cuota local, cuota empate y cuota visitante. Su método principal es `calcularGanancia()`, que recibe el monto apostado y la selección del jugador para calcular la ganancia potencial. Esto permite separar la lógica de los momios del resto del programa y evitar que `Evento_Deportivo` o `Apuesta` tengan demasiadas responsabilidades.
+
+La sobrecarga se aplica en la clase `Sistema_Apuestas` con el método `buscarEvento()`. Hay dos versiones: una permite buscar un evento por `idEvento`, y la otra permite buscarlo por `equipoLocal` y `equipoVisitante`. Esto es útil porque a veces se conoce el ID del evento y otras veces es más natural buscarlo por el nombre de los equipos.
+
+Cabe aclarar que el programa cuenta con un menú interactivo que permite al usuario navegar por las funciones principales del casino desde consola. Primero se muestra un menú general con opciones para ingresar o registrar un usuario, buscar eventos disponibles o salir del sistema. Al elegir la opción de usuario, el programa permite seleccionar si se trabajará como `Jugador` o como `Administrador`. Si se ingresa como jugador, se despliega un submenú para realizar apuestas o consultar el historial personal. Si se ingresa como administrador, se muestra un submenú para agregar nuevos eventos deportivos o revisar el historial general de apuestas. Además, en el `main.cpp` se cargaron valores de prueba, como jugadores, un administrador, eventos deportivos, cuotas y apuestas iniciales, con el objetivo de comprobar que el menú funcione correctamente desde el inicio. Gracias a estos datos precargados, se puede probar que el jugador visualice solo su historial, que el administrador consulte el historial general y que los eventos puedan buscarse por ID o por equipos.
+
 
 
 
